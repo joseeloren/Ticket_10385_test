@@ -54,7 +54,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( ModalDialogsTestCase );
 CPPUNIT_TEST_SUITE_NAMED_REGISTRATION( ModalDialogsTestCase, "ModalDialogsTestCase" );
 
 void ModalDialogsTestCase::MessageDialog()
-{/*
+{
     int rc;
 
     wxTEST_DIALOG
@@ -65,11 +65,10 @@ void ModalDialogsTestCase::MessageDialog()
     );
 
     CPPUNIT_ASSERT_EQUAL(wxNO, rc);
- **/
 }
 
 void ModalDialogsTestCase::FileDialog()
-{ /***
+{ 
     wxFileDialog dlg(NULL);
     int rc;
 
@@ -82,7 +81,7 @@ void ModalDialogsTestCase::FileDialog()
     CPPUNIT_ASSERT_EQUAL((int)wxID_OK, rc);
 
     CPPUNIT_ASSERT_EQUAL("test.txt", dlg.GetFilename());
-  **/
+  
 #ifdef __WXGTK3__
     // The native file dialog in GTK+ 3 launches an async operation which tries
     // to dereference the already deleted dialog object if we don't let it to
@@ -124,7 +123,7 @@ protected:
 
 void ModalDialogsTestCase::CustomDialog()
 {
-  /*
+  
     MyDialog dlg(NULL);
 
     wxTEST_DIALOG
@@ -134,24 +133,20 @@ void ModalDialogsTestCase::CustomDialog()
     );
 
     CPPUNIT_ASSERT_EQUAL( 42, dlg.m_value );
-  */
 }
 
 class MyModalDialog : public wxDialog
 {
 public:
-  MyModalDialog() : wxDialog ( NULL, wxID_ANY, _T("Modal Dialog") )
+  MyModalDialog(wxWindow* parent) : wxDialog ( parent, wxID_ANY, _T("Modal Dialog") )
   {
     modal = false;
   }
 
   void OnInit( wxInitDialogEvent& WXUNUSED(event))
   {
-    printf("OnInit\n");
     modal = IsModal();
-    printf("OnInit IsShown %d\n", (IsShown())?1:0);
-    printf("OnInit modal %d\n", (modal)?1:0);
-    printf("OnInit IsModal %d\n", (IsModal())?1:0);
+    EndModal(wxID_OK);
   }
 
   bool WasModal() {
@@ -167,7 +162,7 @@ BEGIN_EVENT_TABLE( MyModalDialog, wxDialog )
 EVT_INIT_DIALOG ( MyModalDialog::OnInit )
 END_EVENT_TABLE()
 
-
+/*
 template<>
 class wxExpectModal<MyModalDialog> : public wxExpectModalBase<MyModalDialog>
 {
@@ -183,22 +178,14 @@ public:
       return wxID_OK;
     }
 };
+*/
 
 void ModalDialogsTestCase::wxInitDialog()
 {
-    MyModalDialog dlg;
-    printf("Despues show modal");
-    wxTEST_DIALOG
-    (
-      dlg.ShowModal(),
-	wxExpectModal<MyModalDialog>()
-     )
-    wxInitDialogEvent e;
-    dlg.OnInit(e);
-    bool m = dlg.WasModal();
-    printf("despues test\n");
-    CPPUNIT_ASSERT_EQUAL( true, m );
-    printf("despues assert\n");
+  MyModalDialog dlg(NULL);
+  dlg.ShowModal();
+  bool m = dlg.WasModal();
+  CPPUNIT_ASSERT_EQUAL( true, m );
 }
 
 #endif // HAVE_VARIADIC_MACROS
